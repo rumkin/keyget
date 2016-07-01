@@ -1,0 +1,40 @@
+{
+  "main": "src/index.js",
+  "scripts": {
+    "cov": "istanbul cover node_modules/mocha/bin/_mocha -- -u exports -R spec test/**.spec.js",
+    "test": "mocha test/**.spec.js"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "istanbul": "^0.4.4",
+    "mocha": "^2.5.3",
+    "unit.js": "^2.0.0"
+  },
+  "name": "keyget",
+  "description": "Is nested object modification kit. It can find, get, set, push or call nested properties.",
+  "version": "1.0.0",
+  "bin": {
+    "keyget": "cli.js"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/reumkin/keyget.git"
+  },
+  "keywords": [
+    "key",
+    "path",
+    "object",
+    "util",
+    "keypath",
+    "from-object"
+  ],
+  "author": "rumkin",
+  "bugs": {
+    "url": "https://github.com/reumkin/keyget/issues"
+  },
+  "homepage": "https://github.com/reumkin/keyget#readme"
+}
