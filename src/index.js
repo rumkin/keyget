@@ -6,6 +6,75 @@ module.exports.has = hasPath;
 module.exports.push = pushByPath;
 module.exports.method = methodByPath;
 module.exports.call = callByPath;
+module.exports.select = selectValues;
+
+/**
+ * Extract nested value by path and return as array. If target is not an object
+ * or path is empty returns empty array.
+ *
+ * @param  {*} target Value.
+ * @param  {string[]} path   Path to value.
+ * @return {*[]}        Values for path components.
+ * @example
+ *
+ * selectValues({a: b: {1}}, ['a', 'b']); // -> [{b:1}, 1];
+ */
+function selectValues(target, path) {
+  if (! Array.isArray(path)) {
+    throw new Error('Path should be an array');
+  }
+
+  var part;
+  var result = [];
+  var value = target;
+
+  if (! isObject(value)) {
+    return result;
+  }
+
+  for (var i = 0, l = path.length; i < l; i++) {
+    part = path[i];
+
+
+    if (! value.hasOwnProperty(part)) {
+      break;
+    }
+
+    result.push(value[part]);
+
+    value = value[part];
+  }
+
+  return result;
+}
+
+/**
+ * Set value into object with values map.
+ *
+ * @param {*} target Target value.
+ * @param {*[]} values Array of values.
+ * @param {string[]} path   Path to value.
+ * @param {*} value  value to set into target.
+ */
+function setValue(target, values, path, value) {
+  var value;
+
+  if (! path.length) {
+    return target;
+  }
+
+  for (var i = 0, l = path.length - 1; i < l; i++) {
+    if (values.length < i) {
+      target[path[i]] = {};
+    } else if (! isObject(target[path[i]])) {
+      target[path[i]] = {};
+    }
+    target = target[path[i]];
+  }
+
+  target[path[path.length - 1]] = value;
+  return value;
+}
 
 /**
  * Set deeply nested value into target object. If nested properties are not an
@@ -20,25 +89,9 @@ function hasPath(target, path) {
     path = path.split('.');
   }
 
-  var tail = path.slice();
-  var key;
+  var result = selectValues(target, path);
 
-  while (tail.length > 1) {
-    key = tail.shift();
-    if (! isObject(target)) {
-      return undefined;
-    }
-
-    if (key in target === false) {
-      return undefined;
-    }
-
-    target = target[key];
-  }
-
-  key = tail.shift();
-
-  return target.hasOwnProperty(key);
+  return result.length === path.length;
 }
 
 /**
@@ -59,23 +112,9 @@ function setByPath(target, path, value) {
     path = path.split('.');
   }
 
-  var tail = path.slice();
-  var parent, key;
-  parent = target;
+  var values = selectValues(target, path);
 
-  while (tail.length > 1) {
-    key = tail.shift();
-
-    if (key in parent === false || ! isObject(parent[key])) {
-      parent[key] = {};
-    }
-
-    parent = parent[key];
-  }
-
-  parent[tail.shift()] = value;
-
-  return target;
+  return setValue(target, values, path, value);
 }
 
 /**
@@ -95,26 +134,15 @@ function pushByPath(target, path, value) {
     path = path.split('.');
   }
 
-  var tail = path.slice();
-  var parent, key;
-  parent = target;
+  var values = selectValues(target, path);
 
-  while (tail.length > 1) {
-    key = tail.shift();
-
-    if (key in parent === false || ! isObject(parent[key])) {
-      parent[key] = {};
-    }
-
-    parent = parent[key];
+  if (values.length < path.length || ! Array.isArray(values[values.length - 1])) {
+    target = setValue(target, values, path, []);
+  } else {
+    target = values[values.length - 1];
   }
 
-  key = tail.shift();
-  if (! Array.isArray(parent[key])) {
-    parent[key] = [];
-  }
-
-  parent[key].push(value);
+  target.push(value);
 
   return target;
 }
@@ -124,23 +152,9 @@ function getByPath(target, path) {
     path = path.split('.');
   }
 
-  var tail = path.slice();
-  var key;
+  var values = selectValues(target, path);
 
-  while (tail.length > 1) {
-    key = tail.shift();
-    if (! isObject(target)) {
-      return undefined;
-    }
-
-    if (key in target === false) {
-      return undefined;
-    }
-
-    target = target[key];
-  }
-
-  return target[tail.shift()];
+  return values[values.length - 1];
 }
 
 function methodByPath(target, path) {
@@ -148,33 +162,27 @@ function methodByPath(target, path) {
     path = path.split('.');
   }
 
-  var tail = path.slice();
-  var key;
+  var values = selectValues(target, path);
 
-  while (tail.length > 1) {
-    key = tail.shift();
-    if (! isObject(target)) {
-      return undefined;
-    }
-
-    if (key in target === false) {
-      return undefined;
-    }
-
-    target = target[key];
+  if (values.length < path.length) {
+    return;
   }
 
-  key = tail.shift();
+  if (typeof values[values.length - 1] !== 'function') {
+    return;
+  }
 
-  if (typeof target[key] === 'function') {
-    return target[key].bind(target);
+  if (values.length > 1) {
+    return values[values.length - 1].bind(values[values.length - 2]);
+  } else {
+    return values[0].bind(target);
   }
 }
 
 function callByPath(target, path, args) {
   var fn = methodByPath(target, path);
   if (! fn) {
-    return undefined;
+    return;
   }
 
   return fn.apply(null, args);
