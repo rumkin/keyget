@@ -7,7 +7,7 @@ describe('keyget', function () {
     it('Select "a" from {a: 1}', function () {
       const result = keyget.select({a: 1}, ['a']);
 
-      should(result[0]).be.equal(1);
+      should(result).be.deepEqual([1]);
     });
 
     it('Should select part of path', function () {
@@ -105,15 +105,27 @@ describe('keyget', function () {
     });
 
     it('Should get value', function () {
-      const obj = {
+      const target = {
         a: {
           b: 1,
         },
       };
 
-      const result = keyget.get(obj, '');
+      const result = keyget.get(target, '');
 
-      should(result).be.Undefined();
+      should(result).be.equal(target);
+    });
+
+    it('Should get value', function () {
+      const target = {
+        a: {
+          b: 1,
+        },
+      };
+
+      const result = keyget.get(target, []);
+
+      should(result).be.equal(target);
     });
 
     it('Should call by path', function () {

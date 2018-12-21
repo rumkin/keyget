@@ -4,11 +4,23 @@ exports.has = hasPath;
 exports.push = pushByPath;
 exports.method = methodByPath;
 exports.call = callByPath;
-exports.select = selectValues;
+exports.breadcrumbs = breadcrumbs;
+exports.select = select;
 exports.structure = getStructure;
 
 /**
- * Extract nested value by path and return as array. If target is not an object
+ * select - Create breadcrumbs object without the root element.
+ *
+ * @param  {*} target Nested object or anything else.
+ * @param  {String[]} path Path to select.
+ * @return {*[]} Array of values for each path segment.
+ */
+function select(target, path) {
+  return breadcrumbs(target, path).slice(1);
+}
+
+/**
+ * breadcrumbs - Extract nested value by path and return as array. If target is not an object
  * or path is empty returns empty array.
  *
  * @param  {*} target Value.
@@ -16,14 +28,14 @@ exports.structure = getStructure;
  * @return {*[]}        Values for path components.
  * @example
  *
- * selectValues({a: b: {1}}, ['a', 'b']); // -> [{b:1}, 1];
+ * breadcrumbs({a: b: {1}}, ['a', 'b']); // -> [{b:1}, 1];
  */
-function selectValues(target, path) {
+function breadcrumbs(target, path) {
   if (! Array.isArray(path)) {
     throw new Error('Path should be an array');
   }
 
-  const result = [];
+  const result = [target];
   let part;
   let value = target;
 
@@ -58,7 +70,7 @@ function selectValues(target, path) {
  */
 function setValue(target, values, path, value) {
   if (! path.length) {
-    return target;
+    return value;
   }
 
   for (let i = 0, l = path.length - 1; i < l; i++) {
@@ -86,9 +98,9 @@ function setValue(target, values, path, value) {
 function hasPath(target, path) {
   path = pathToArray(path);
 
-  const result = selectValues(target, path);
+  const result = breadcrumbs(target, path);
 
-  return result.length === path.length;
+  return result.length === path.length + 1;
 }
 
 /**
@@ -107,7 +119,7 @@ function setByPath(target, path, value) {
 
   path = pathToArray(path);
 
-  const values = selectValues(target, path);
+  const values = breadcrumbs(target, path);
 
   return setValue(target, values, path, value);
 }
@@ -138,7 +150,7 @@ function pushByPath(target, path, value) {
     target = {};
   }
 
-  const values = selectValues(target, path);
+  const values = breadcrumbs(target, path);
 
   if (values.length < path.length || ! Array.isArray(values[values.length - 1])) {
     setValue(target, values, path, [value]);
@@ -160,7 +172,7 @@ function pushByPath(target, path, value) {
 function getByPath(target, path) {
   path = pathToArray(path);
 
-  const values = selectValues(target, path);
+  const values = breadcrumbs(target, path);
 
   return values[values.length - 1];
 }
@@ -176,7 +188,7 @@ function getByPath(target, path) {
 function methodByPath(target, path) {
   path = pathToArray(path);
 
-  const values = selectValues(target, path);
+  const values = breadcrumbs(target, path);
 
   if (values.length < path.length) {
     return noop;

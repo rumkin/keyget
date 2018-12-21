@@ -1,3 +1,7 @@
+# v2.1
+
+* Add `breadcrumbs` method.
+
 # v2.0
 
 Refactored and reviewed 1.0 version. Has some breaking changes:
