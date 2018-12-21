@@ -37,7 +37,10 @@
   "bugs": {
     "url": "https://github.com/rumkin/keyget/issues"
   },
-  "homepage": "https://github.com/rumkin/keyget#readme",
+  "homepage": "https://github.com/rumkin/keyget",
+  "engine": {
+    "node": ">= 6.0"
+  },
   "husky": {
     "hooks": {
       "pre-commit": "npm test"

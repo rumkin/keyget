@@ -1,5 +1,8 @@
 # Keyget
 
+[![npm](https://img.shields.io/npm/v/keyget.svg?style=flat-square)](https://npmjs.com/package/keyget)
+[![Travis](https://img.shields.io/travis/rumkin/keyget.svg?style=flat-square)](https://travis-ci.org/rumkin/keyget)
+
 Tiny kit for nested objects modification. It can find, get, set, push or call nested
 properties.
 
