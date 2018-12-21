@@ -222,16 +222,9 @@ function getStructure(target, prefix) {
 
   if (Array.isArray(target)) {
     return target.reduce(function (result, value, i) {
-      if (isObject(value)) {
-        return result.concat(getStructure(value, prefix.concat(i)));
-      }
-      else {
-        result.push({
-          path: prefix.concat(i),
-          value: value,
-        });
-        return result;
-      }
+      return result.concat(
+        getPropStructure(value, prefix.concat(i))
+      );
     }, []);
   }
   else {
@@ -239,17 +232,22 @@ function getStructure(target, prefix) {
     .reduce(function(result, key) {
       const value = target[key];
 
-      if (isObject(value)) {
-        return result.concat(getStructure(value, prefix.concat(key)));
-      }
-      else {
-        result.push({
-          path: prefix.concat(key),
-          value: value,
-        });
-        return result;
-      }
+      return result.concat(
+        getPropStructure(value, prefix.concat(key))
+      );
     }, []);
+  }
+}
+
+function getPropStructure(value, path) {
+  if (isObject(value)) {
+    return getStructure(value, path);
+  }
+  else {
+    return [{
+      path: path,
+      value: value,
+    }];
   }
 }
 

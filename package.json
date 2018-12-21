@@ -1,7 +1,7 @@
 {
   "name": "keyget",
   "description": "Is nested object modification kit. It can find, get, set, push or call nested properties.",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "main": "index.js",
   "scripts": {
     "cov": "istanbul cover node_modules/mocha/bin/_mocha -- -u exports -R spec test/**.spec.js",
