@@ -1,135 +1,137 @@
-'use strict';
+const should = require('should');
 
 const keyget = require('..');
-const test = require('unit.js');
 
-describe('keyget', () => {
-  describe('Select values', () => {
-    it('Select "a" from {a: 1}', () => {
-      let result = keyget.select({a: 1}, ['a']);
+describe('keyget', function () {
+  describe('Select values', function () {
+    it('Select "a" from {a: 1}', function () {
+      const result = keyget.select({a: 1}, ['a']);
 
-      test.number(result[0]).is(1);
+      should(result[0]).be.equal(1);
     });
 
-    it('Should select part of path', () => {
-      let result = keyget.select({a: {b: 2}}, ['a', 'b', 'c']);
+    it('Should select part of path', function () {
+      const result = keyget.select({a: {b: 2}}, ['a', 'b', 'c']);
 
-      test.array(result).is([{b: 2}, 2]);
+      should(result).be.deepEqual([{b: 2}, 2]);
     });
 
-    it('Should return empty array on mismatch', () => {
-      let result = keyget.select({b: 1}, ['a', 'b', 'c']);
+    it('Should return empty array on mismatch', function () {
+      const result = keyget.select({b: 1}, ['a', 'b', 'c']);
 
-
-      test.array(result).is([]);
+      should(result).be.deepEqual([]);
     });
 
-    it('Should return empty array from null', () => {
-      let result = keyget.select(null, ['a', 'b', 'c']);
+    it('Should return empty array from null', function () {
+      const result = keyget.select(null, ['a', 'b', 'c']);
 
-
-      test.array(result).is([]);
+      should(result).be.deepEqual([]);
     });
 
-    it('Should return empty array from number', () => {
-      let result = keyget.select(1, ['a', 'b', 'c']);
+    it('Should return empty array from number', function () {
+      const result = keyget.select(1, ['a', 'b', 'c']);
 
-
-      test.array(result).is([]);
+      should(result).be.deepEqual([]);
     });
 
-    it('Should return empty array from undefined', () => {
-      let result = keyget.select(undefined, ['a', 'b', 'c']);
+    it('Should return empty array from undefined', function () {
+      const result = keyget.select(undefined, ['a', 'b', 'c']);
 
-
-      test.array(result).is([]);
+      should(result).be.deepEqual([]);
     });
   });
 
-  describe('utils', () => {
-    it('Should check if value exists', () => {
-      var o = {
+  describe('utils', function () {
+    it('Should check if value exists', function () {
+      const o = {
         a: {
           b: {
-            c: 1
+            c: 1,
           },
         },
       };
 
-      var result = keyget.has(o, 'a.b.c');
+      const result = keyget.has(o, 'a.b.c');
 
-      test.bool(result).isTrue();
+      should(result).be.True();
     });
 
-    it('Should set value', () => {
-      var obj = {};
+    it('Should set value', function () {
+      const obj = {};
       keyget.set(obj, 'a.b.c', 1);
 
-      test.object(obj).hasProperty('a');
-      test.object(obj.a).hasProperty('b');
-      test.object(obj.a.b).hasProperty('c');
-      test.number(obj.a.b.c).is(1);
+      should(obj).has.ownProperty('a')
+      .which.has.ownProperty('b')
+      .which.has.ownProperty('c')
+      .which.is.equal(1);
     });
 
-    it('Should push value', () => {
-      var obj = {};
+    it('Should push value', function () {
+      const obj = {};
       keyget.push(obj, 'a.b.c', 1);
 
-      test.object(obj).hasProperty('a');
-      test.object(obj.a).hasProperty('b');
-      test.object(obj.a.b).hasProperty('c');
-      test.array(obj.a.b.c).is([1]);
+      should(obj).has.ownProperty('a')
+      .which.has.ownProperty('b')
+      .which.has.ownProperty('c')
+      .which.is.deepEqual([1]);
     });
 
-    it('Should push value into existing array', () => {
-      var obj = {a: {b: [1]}};
+    it('Should push to anything', function () {
+      const target = null;
+      const result = keyget.push(target, '', 1);
+
+      should(result).is.Array().and.deepEqual([1]);
+    });
+
+    it('Should push value into existing array', function () {
+      const obj = {a: {b: [1]}};
       keyget.push(obj, 'a.b', 2);
 
-      test.object(obj).hasProperty('a');
-      test.object(obj.a).hasProperty('b');
-      test.array(obj.a.b).is([1, 2]);
+      should(obj).has.ownProperty('a')
+      .which.has.ownProperty('b')
+      .which.is.deepEqual([1, 2]);
     });
 
-    it('Should get value', () => {
-      var obj = {
+    it('Should get value', function () {
+      const obj = {
         a: {
-          b: 1
-        }
+          b: 1,
+        },
       };
 
-      var value = keyget.get(obj, 'a.b');
+      const result = keyget.get(obj, 'a.b');
 
-      test.number(value).is(1);
+      should(result).be.equal(1);
     });
 
-    it('Should get value', () => {
-      var obj = {
+    it('Should get value', function () {
+      const obj = {
         a: {
-          b: 1
-        }
+          b: 1,
+        },
       };
 
-      var value = keyget.get(obj, '');
+      const result = keyget.get(obj, '');
 
-      test.undefined(value);
+      should(result).be.Undefined();
     });
 
-    it('Should call by path', () => {
-      var obj = {
+    it('Should call by path', function () {
+      const obj = {
         prop: {
           method() {
             return 1;
-          }
-        }
+          },
+        },
       };
 
-      var result = keyget.call(obj, 'prop.method');
+      const result = keyget.call(obj, 'prop.method');
 
-      test.number(result).is(1);
+      should(result).be.equal(1);
     });
 
-    it('Should get method from object', () => {
-      var o = {
+    it('Should get method from object', function () {
+      const o = {
         a: {
           b() {
             return this;
@@ -138,11 +140,72 @@ describe('keyget', () => {
         },
       };
 
-      var method = keyget.method(o, 'a.b');
+      const method = keyget.method(o, 'a.b');
 
-      test.function(method);
+      should(method).be.Function();
+      should(method()).be.Object().and.equal(o.a);
+    });
+  });
 
-      test.object(method()).is(o.a);
+  describe('structure()', function() {
+    it('Should return empty value structure', function() {
+      const result = keyget.structure(null);
+
+      should(result).be.deepEqual([
+        {path: [], value: null},
+      ]);
+    });
+
+    it('Should return primitive value structure', function() {
+      const result = keyget.structure('Hello');
+
+      should(result).be.deepEqual([
+        {path: [], value: 'Hello'},
+      ]);
+    });
+
+    it('Should return array structure', function() {
+      const result = keyget.structure([
+        1,
+        2,
+      ]);
+
+      should(result).be.deepEqual([
+        {path: [0], value: 1},
+        {path: [1], value: 2},
+      ]);
+    });
+
+    it('Should return object structure', function() {
+      const result = keyget.structure({
+        a: 1,
+        b: 2,
+      });
+
+      should(result).be.deepEqual([
+        {path: ['a'], value: 1},
+        {path: ['b'], value: 2},
+      ]);
+    });
+
+    it('Should return nested object structure', function() {
+      const result = keyget.structure({
+        a: {b: 1},
+      });
+
+      should(result).be.deepEqual([
+        {path: ['a', 'b'], value: 1},
+      ]);
+    });
+
+    it('Should return mixed nested object structure', function() {
+      const result = keyget.structure({
+        a: [{b: 1}],
+      });
+
+      should(result).be.deepEqual([
+        {path: ['a', 0, 'b'], value: 1},
+      ]);
     });
   });
 });

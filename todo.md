@@ -1,4 +1,4 @@
-# v 1.1
+# v1.1
 
-* [ ] Refactor code.
-* [ ] Add unified property extractor.
+* [x] Refactor code.
+* [-] Add unified property extractor.

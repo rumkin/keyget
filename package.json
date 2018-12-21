@@ -1,18 +1,19 @@
 {
-  "main": "src/index.js",
+  "name": "keyget",
+  "description": "Is nested object modification kit. It can find, get, set, push or call nested properties.",
+  "version": "2.0.0",
+  "main": "index.js",
   "scripts": {
     "cov": "istanbul cover node_modules/mocha/bin/_mocha -- -u exports -R spec test/**.spec.js",
     "test": "mocha test/**.spec.js"
   },
   "license": "MIT",
   "devDependencies": {
+    "husky": "^1.3.0",
     "istanbul": "^0.4.4",
-    "mocha": "^2.5.3",
-    "unit.js": "^2.0.0"
+    "mocha": "^5.2.0",
+    "should": "^13.2.3"
   },
-  "name": "keyget",
-  "description": "Is nested object modification kit. It can find, get, set, push or call nested properties.",
-  "version": "1.0.0",
   "bin": {
     "keyget": "cli.js"
   },
@@ -22,7 +23,7 @@
   "dependencies": {},
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/reumkin/keyget.git"
+    "url": "git+https://github.com/rumkin/keyget.git"
   },
   "keywords": [
     "key",
@@ -34,7 +35,12 @@
   ],
   "author": "rumkin",
   "bugs": {
-    "url": "https://github.com/reumkin/keyget/issues"
+    "url": "https://github.com/rumkin/keyget/issues"
   },
-  "homepage": "https://github.com/reumkin/keyget#readme"
+  "homepage": "https://github.com/rumkin/keyget#readme",
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm test"
+    }
+  }
 }
