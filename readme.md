@@ -14,31 +14,49 @@ Install via npm:
 npm i keyget
 ```
 
+## Usage
+
+Update nested object:
+
+```javascript
+const {get, set, has} = require('keyget');
+const target = {};
+
+if (! has(target, ['user', 'name'])) {
+  set(target, ['user', 'name'], 'Rick Sanchez');
+}
+
+get(target, ['user', 'name']); // -> 'Rick Sanchez'
+target; // -> {user: {name: 'Rick Sanchez'}}
+```
+
 ## API
 
 ### `get()`
 
 ```
-target:Object, key:String|[]String) -> *
+target:Object, path: String|[]String) -> *
 ```
 
-Get value from object. `key` could be string with dot as delimiter or array of
-path segments.
+Get deeply nested property from `target` by `path`, which could be a string
+with dot as separator or array of path segments.
+
+Returns property value or undefined if there is no such property.
 
 ### `set()`
 ```
-(target: Object, key: String|[]String, value: * ) -> null
+(target: Object, path: String|[]String, value: * ) -> null
 ```
 
-Set value into `target`. If any property in `path` is not an object,
-replaces it with plain object.
+Set value into `target`. If any `target`'s property on the `path` is not an object,
+replaces it with the new plain object.
 
 Returns `target`.
 
 ### `has()`
 
 ```
-(target:Object, key:String|[]String) -> Boolean
+(target: Object, path: String|[]String) -> Boolean
 ```
 
 Check wether `path` exists in a `target`.
@@ -46,7 +64,7 @@ Check wether `path` exists in a `target`.
 ### `call()`
 
 ```
-(target: Object, key:String|[]String, arguments: Array) -> *
+(target: Object, path: String|[]String, arguments: Array) -> *
 ```
 
 Call nested method with proper `this` context.
@@ -56,7 +74,7 @@ Returns methods result or undefined if method not exists.
 ### `method()`
 
 ```
-(target: Object, key: String|[]String) -> function
+(target: Object, path: String|[]String) -> function
 ```
 
 Get nested method of `target` by `path` and returns method binding with `this`
@@ -73,4 +91,8 @@ Present `target` as list of paths and values.
 
 ## License
 
-Licensed under MIT.
+MIT.
+
+## Copyright
+
+Rumkin, 2016–2018.
