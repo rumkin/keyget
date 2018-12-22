@@ -187,8 +187,4 @@ Examples:
 
 ## License
 
-MIT.
-
----
-
-Rumkin, 2016–2018.
+MIT © [Rumkin](https://rumk.in)
