@@ -6,13 +6,19 @@ exports.method = methodByPath;
 exports.call = callByPath;
 exports.breadcrumbs = breadcrumbs;
 exports.select = select;
+exports.at = at;
 exports.structure = getStructure;
+
+/**
+ * Property path as String delimited with dots or array of keys and indexes.
+ * @typedef {String|Array<String|Number} Path
+ */
 
 /**
  * select - Create breadcrumbs object without the root element.
  *
  * @param  {*} target Nested object or anything else.
- * @param  {String[]} path Path to select.
+ * @param  {Path} path Path to select.
  * @return {*[]} Array of values for each path segment.
  */
 function select(target, path) {
@@ -24,16 +30,14 @@ function select(target, path) {
  * or path is empty returns empty array.
  *
  * @param  {*} target Value.
- * @param  {string[]} path   Path to value.
+ * @param  {Path} path   Path to value.
  * @return {*[]}        Values for path components.
  * @example
  *
  * breadcrumbs({a: b: {1}}, ['a', 'b']); // -> [{b:1}, 1];
  */
 function breadcrumbs(target, path) {
-  if (! Array.isArray(path)) {
-    throw new Error('Path should be an array');
-  }
+  path = pathToArray(path);
 
   const result = [target];
   let part;
@@ -59,40 +63,11 @@ function breadcrumbs(target, path) {
 }
 
 /**
- * setValue - Set value into object with values map.
- *
- * @param {*} target Target value.
- * @param {*[]} values Array of values.
- * @param {string[]} path   Path to value.
- * @param {*} value  value to set into target.
- * @return {void}
- * @private
- */
-function setValue(target, values, path, value) {
-  if (! path.length) {
-    return value;
-  }
-
-  for (let i = 0, l = path.length - 1; i < l; i++) {
-    if (values.length < i) {
-      target[path[i]] = {};
-    }
-    else if (! isObject(target[path[i]])) {
-      target[path[i]] = {};
-    }
-    target = target[path[i]];
-  }
-
-  target[path[path.length - 1]] = value;
-  return target;
-}
-
-/**
  * hasPath - Set deeply nested value into target object. If nested properties
  * are not an objects or not exists creates them.
  *
  * @param {Object} target Parent object.
- * @param {Array} path   Array of path segments.
+ * @param {Path} path   Array of path segments.
  * @return {Boolean} Returns true if object contains `path`.
  */
 function hasPath(target, path) {
@@ -108,30 +83,45 @@ function hasPath(target, path) {
  * are not an objects or not exists creates them.
  *
  * @param {Object} target Parent object.
- * @param {Array} path Array of path segments.
+ * @param {Path} path Array of path segments.
  * @param {*} value Value to set.
  * @return {void}
  */
 function setByPath(target, path, value) {
-  if (! isObject(target)) {
+  path = pathToArray(path);
+
+  if (! path.length) {
+    return value;
+  }
+
+  const key = path[0];
+  if (isNumber(key)) {
+    if (! Array.isArray(target)) {
+      target = [];
+    }
+  }
+  else if (! isObject(target)) {
     target = {};
   }
 
-  path = pathToArray(path);
+  if (path.length > 1) {
+    target[key] = setByPath(target[key], path.slice(1), value);
+  }
+  else {
+    target[key] = value;
+  }
 
-  const values = breadcrumbs(target, path);
-
-  return setValue(target, values, path, value);
+  return target;
 }
 
 /**
  * Push deeply nested value into target object. If nested properties are not an
  * objects or not exists creates them.
  *
- * @param {Object} target Parent object.
- * @param {Array} path   Array of path segments.
+ * @param {*} target Parent object.
+ * @param {Path} path   Array of path segments.
  * @param {*} value Value to set.
- * @return {Object} Returns updated `target`.
+ * @return {Object|Array} Returns updated `target`.
  */
 function pushByPath(target, path, value) {
   path = pathToArray(path);
@@ -150,13 +140,55 @@ function pushByPath(target, path, value) {
     target = {};
   }
 
-  const values = breadcrumbs(target, path);
+  return at(target, path, function(finalTarget, key) {
+    if (Array.isArray(finalTarget[key])) {
+      finalTarget[key].push(value);
+    }
+    else {
+      finalTarget[key] = [value];
+    }
 
-  if (values.length < path.length || ! Array.isArray(values[values.length - 1])) {
-    setValue(target, values, path, [value]);
+    return finalTarget;
+  });
+}
+
+/**
+ * @callback atCallback
+ * @param {*} target Target value.
+ * @param {?(String|Number)} key Key or index of property.
+ * @return {*} Return new target valus.
+ */
+
+/**
+ * at - Update nested `target` at `path` using `update` function.
+ *
+ * @param  {*} target Nest object or anything else.
+ * @param  {Path} path Property path.
+ * @param  {atCallback} update Update last path's item.
+ * @return {*} Updated target value
+ */
+function at(target, path, update) {
+  path = pathToArray(path);
+
+  if (! path.length) {
+    return update(target, null);
+  }
+
+  const key = path[0];
+  if (isNumber(key)) {
+    if (! Array.isArray(target)) {
+      target = [];
+    }
+  }
+  else if (! isObject(target)) {
+    target = {};
+  }
+
+  if (path.length > 1) {
+    target[key] = at(target[key], path.slice(1), update);
   }
   else {
-    values[values.length - 1].push(value);
+    target = update(target, key);
   }
 
   return target;
@@ -166,7 +198,7 @@ function pushByPath(target, path, value) {
  * getByPath - Get value from `target` by `path`.
  *
  * @param  {*} target Nested object or anything else.
- * @param  {String|String[]} path Path to nested property.
+ * @param  {Path} path Path to nested property.
  * @return {*} Returns value or undefined.
  */
 function getByPath(target, path) {
@@ -182,7 +214,7 @@ function getByPath(target, path) {
  * captured context as the method's owner object.
  *
  * @param  {*} target Deeply nested object or anything else.
- * @param  {String|String[]} path Path to the method.
+ * @param  {Path} path Path to the method.
  * @return {Function} Returns function.
  */
 function methodByPath(target, path) {
@@ -210,7 +242,7 @@ function methodByPath(target, path) {
  * callByPath - Call method by it's path in nested object.
  *
  * @param  {*} target Nested object or anything else.
- * @param  {String|String[]} path Path to nested property.
+ * @param  {Path} path Path to nested property.
  * @param  {*[]} args Arguments of function call.
  * @return {*} Result of function call or undefined if method not exists.
  */
@@ -265,6 +297,10 @@ function getPropStructure(value, path) {
 
 function isObject(target) {
   return target !== null && typeof target === 'object';
+}
+
+function isNumber(target) {
+  return typeof target === 'number';
 }
 
 function noop() {}

@@ -159,6 +159,38 @@ describe('keyget', function () {
     });
   });
 
+  describe('set()', function() {
+    it('Should set value to null by path []', function() {
+      const result = keyget.set(null, [], true);
+
+      should(result).be.equal(true);
+    });
+
+    it('Should set value to null by path ["a"]', function() {
+      const result = keyget.set(null, ['a'], 1);
+
+      should(result).be.deepEqual({a: 1});
+    });
+
+    it('Should set value to null by path [0]', function() {
+      const result = keyget.set(null, [0], 1);
+
+      should(result).be.deepEqual([1]);
+    });
+
+    it('Should set value to null by path ["a", 0]', function() {
+      const result = keyget.set(null, ['a', 0], 1);
+
+      should(result).be.deepEqual({a:[1]});
+    });
+
+    it('Should set value to null by path [0, "a"]', function() {
+      const result = keyget.set(null, [0, 'a'], 1);
+
+      should(result).be.deepEqual([{a:1}]);
+    });
+  });
+
   describe('structure()', function() {
     it('Should return empty value structure', function() {
       const result = keyget.structure(null);

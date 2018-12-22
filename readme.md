@@ -3,8 +3,29 @@
 [![npm](https://img.shields.io/npm/v/keyget.svg?style=flat-square)](https://npmjs.com/package/keyget)
 [![Travis](https://img.shields.io/travis/rumkin/keyget.svg?style=flat-square)](https://travis-ci.org/rumkin/keyget)
 
-Tiny kit for nested objects modification. It can find, get, set, push or call nested
-properties.
+Tiny kit for nested objects modification. It can find, get, set, push or call
+nested properties, create bindings, destructure objects and a little bit more.
+
+## ToC
+<!-- TOC -->
+
+- [Installation](#installation)
+- [Usage](#usage)
+- [API](#api)
+  - [`get()`](#get)
+  - [`set()`](#set)
+  - [`has()`](#has)
+  - [`call()`](#call)
+  - [`method()`](#method)
+  - [`breadcrumbs()`](#breadcrumbs)
+  - [`structure()`](#structure)
+  - [`at()`](#at)
+  - [`Path`](#path)
+  - [`PathArray`](#patharray)
+- [License](#license)
+
+<!-- /TOC -->
+
 
 ## Installation
 
@@ -19,7 +40,8 @@ npm i keyget
 Update nested object:
 
 ```javascript
-const {get, set, has} = require('keyget');
+import {get, set, has} from 'keyget';
+
 const target = {};
 
 if (! has(target, ['user', 'name'])) {
@@ -32,10 +54,12 @@ target; // -> {user: {name: 'Rick Sanchez'}}
 
 ## API
 
+Every method accepts path argument. It should has [Path](#path) or [PathArray](#patharray) type.
+
 ### `get()`
 
 ```
-target: *, path: String|[]String) -> *
+(target: *, path: Path) -> *
 ```
 
 Get deeply nested property from `target` by `path`, which could be a string
@@ -45,7 +69,7 @@ Returns property value or undefined if there is no such property.
 
 ### `set()`
 ```
-(target: *, path: String|[]String, value: * ) -> null
+(target: *, path: Path, value: * ) -> null
 ```
 
 Set value into `target`. If any `target`'s property on the `path` is not an object,
@@ -56,7 +80,7 @@ Returns `target`.
 ### `has()`
 
 ```
-(target: *, path: String|[]String) -> Boolean
+(target: *, path: Path) -> Boolean
 ```
 
 Check wether `path` exists in a `target`.
@@ -64,7 +88,7 @@ Check wether `path` exists in a `target`.
 ### `call()`
 
 ```
-(target: *, path: String|[]String, arguments: Array) -> *
+(target: *, path: Path, arguments: Array) -> *
 ```
 
 Call nested method with proper `this` context.
@@ -74,7 +98,7 @@ Returns methods result or undefined if method not exists.
 ### `method()`
 
 ```
-(target: *, path: String|[]String) -> function
+(target: *, path: Path) -> function
 ```
 
 Get nested method of `target` by `path` and returns method binding with `this`
@@ -84,10 +108,11 @@ function.
 ### `breadcrumbs()`
 
 ```
-(target: *, path: String|[]String) -> []*
+(target: *, path: Path) -> []*
 ```
 
-Returns values for each path segment.
+Returns values for each path segment. The first element is always `target`
+itself.
 
 ```javascript
 const target = {
@@ -104,7 +129,7 @@ breadcrumbs(target, ['a', 'b']); // -> [{a: {b: {c: 1}}}, {b: {c: 1}}, {c: 1}]
 ### `structure()`
 
 ```
-(target: *) -> []{path: []String, value: *}
+(target: *) -> []{path: PathArray, value: *}
 ```
 
 Present `target` as list of paths and values.
@@ -121,10 +146,49 @@ const struct = structure({
 struct; // -> [{path: ['a', 'b'], value: 1}]
 ```
 
+### `at()`
+
+```
+(target: *, path: Path, update: UpdateFunc) -> *
+
+UpdateFunc:
+  (target: *, key: Number|String) -> *
+```
+
+Update deeply nested property of `target` by `path` using `update` function.
+Result of `update` will be used as value of last ancestor. Returns updated
+`target`.
+
+### `Path`
+```
+String|PathArray
+```
+
+Examples:
+```javascript
+// String: Dot separated paths
+'user.name';
+'user.friends.0.id';
+// PathArray: array of keys and indexes
+['user', 'name'];
+['user', 'friends', 0, 'id'];
+```
+
+### `PathArray`
+```
+[]<String|Number>
+```
+
+Examples:
+```javascript
+['user', 'name'];
+['user', 'friends', 0, 'id'];
+```
+
 ## License
 
 MIT.
 
-## Copyright
+---
 
 Rumkin, 2016–2018.
