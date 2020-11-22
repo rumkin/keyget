@@ -26,6 +26,8 @@ Desktop.ini
 /pids/
 /tmp/
 /.nyc_output/
+/package-lock.json
+/pnpm-lock.yaml
 
 # Local data
 /local/
