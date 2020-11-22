@@ -1,11 +1,31 @@
-node_modules
-npm-debug.log
-coverage
+# Repo-wide
+# -----------------------------------------------------------------------------
+
+# Dirs
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Runtime files
+*.lock
+*.log
 *.pid
+*.pid.lock
 
+# Repo root
+# -----------------------------------------------------------------------------
 
-**/.DS_Store
+# Technical output
+/build/
+/coverage/
+/dist/
+/logs/
+/pids/
+/tmp/
+/.nyc_output/
 
-tmp
-local
-build
+# Local data
+/local/

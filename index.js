@@ -104,6 +104,8 @@ function setByPath(target, path, value) {
     target = {};
   }
 
+  validateKey(key);
+
   if (path.length > 1) {
     target[key] = setByPath(target[key], path.slice(1), value);
   }
@@ -115,7 +117,7 @@ function setByPath(target, path, value) {
 }
 
 /**
- * Push deeply nested value into target object. If nested properties are not an
+ * Push deeply nested value into target object. If nested properties are not
  * objects or not exists creates them.
  *
  * @param {*} target Parent object.
@@ -184,6 +186,7 @@ function at(target, path, update) {
     target = {};
   }
 
+  validateKey(key);
   if (path.length > 1) {
     target[key] = at(target[key], path.slice(1), update);
   }
@@ -234,7 +237,7 @@ function methodByPath(target, path) {
     return values[values.length - 1].bind(values[values.length - 2]);
   }
   else {
-    return values[0].bind(target);
+    return values[0].bind(null);
   }
 }
 
@@ -248,9 +251,6 @@ function methodByPath(target, path) {
  */
 function callByPath(target, path, args) {
   var fn = methodByPath(target, path);
-  if (! fn) {
-    return;
-  }
 
   return fn.apply(null, args);
 }
@@ -267,7 +267,7 @@ function getStructure(target, prefix) {
   if (Array.isArray(target)) {
     return target.reduce(function (result, value, i) {
       return result.concat(
-        getPropStructure(value, prefix.concat(i))
+        getPropStructure(value, prefix.concat(i)),
       );
     }, []);
   }
@@ -277,7 +277,7 @@ function getStructure(target, prefix) {
       const value = target[key];
 
       return result.concat(
-        getPropStructure(value, prefix.concat(key))
+        getPropStructure(value, prefix.concat(key)),
       );
     }, []);
   }
@@ -316,5 +316,17 @@ function pathToArray(path) {
   }
   else {
     return path;
+  }
+}
+
+const usafeProperties = [
+  '__proto__',
+  'constructor',
+  'prototype',
+];
+
+function validateKey(key) {
+  if (usafeProperties.includes(key)) {
+    throw new Error('Property "' + key + '" is not a valid key');
   }
 }

@@ -3,7 +3,7 @@ const should = require('should');
 const keyget = require('..');
 
 describe('keyget', function () {
-  describe('Select values', function () {
+  describe('select()', function () {
     it('Select "a" from {a: 1}', function () {
       const result = keyget.select({a: 1}, ['a']);
 
@@ -64,32 +64,6 @@ describe('keyget', function () {
       .which.has.ownProperty('b')
       .which.has.ownProperty('c')
       .which.is.equal(1);
-    });
-
-    it('Should push value', function () {
-      const obj = {};
-      keyget.push(obj, 'a.b.c', 1);
-
-      should(obj).has.ownProperty('a')
-      .which.has.ownProperty('b')
-      .which.has.ownProperty('c')
-      .which.is.deepEqual([1]);
-    });
-
-    it('Should push to anything', function () {
-      const target = null;
-      const result = keyget.push(target, '', 1);
-
-      should(result).is.Array().and.deepEqual([1]);
-    });
-
-    it('Should push value into existing array', function () {
-      const obj = {a: {b: [1]}};
-      keyget.push(obj, 'a.b', 2);
-
-      should(obj).has.ownProperty('a')
-      .which.has.ownProperty('b')
-      .which.is.deepEqual([1, 2]);
     });
 
     it('Should get value', function () {
@@ -159,6 +133,116 @@ describe('keyget', function () {
     });
   });
 
+  describe('push()', function() {
+    it('Should push value by path "a.b.c" to {}', function () {
+      const obj = {};
+      keyget.push(obj, 'a.b.c', 1);
+
+      should(obj).has.ownProperty('a')
+      .which.has.ownProperty('b')
+      .which.has.ownProperty('c')
+      .which.is.deepEqual([1]);
+    });
+
+    it('Should push 2 by path "" to [1]', function () {
+      const target = [1];
+      const result = keyget.push(target, '', 2);
+
+      should(result).is.Array().and.deepEqual([1, 2]);
+    });
+
+    it('Should push 1 by path "" to null', function () {
+      const target = null;
+      const result = keyget.push(target, '', 1);
+
+      should(result).is.Array().and.deepEqual([1]);
+    });
+
+    it('Should push 1 by path "a.b" to {a: {b: [1]}}', function () {
+      const obj = {a: {b: [1]}};
+      keyget.push(obj, 'a.b', 2);
+
+      should(obj).has.ownProperty('a')
+      .which.has.ownProperty('b')
+      .which.is.deepEqual([1, 2]);
+    });
+
+    it('Should push 1 by path "a.b" to 1', function () {
+      const target = 1;
+      const result = keyget.push(target, 'a.b', 1);
+
+      should(result).has.ownProperty('a')
+      .which.has.ownProperty('b')
+      .which.is.deepEqual([1]);
+    });
+
+    it('Should through on __proto__ as a key', function() {
+      should.throws(function () {
+        keyget.push({}, ['__proto__', 1], {});
+      }, /__proto__/);
+    });
+  });
+
+  describe('method()', function() {
+    it('Should get method by path "greet"', function() {
+      const target = {
+        name: 'user',
+        greet() {
+          return 'Hello, ' + this.name;
+        },
+      };
+      const result = keyget.method(target, 'greet');
+      should(result()).be.equal('Hello, user');
+    });
+
+    it('Should get method by path "greet"', function() {
+      const target = function(a, b) {
+        return a + b;
+      };
+      const result = keyget.method(target, 'greet');
+      should(result(1, 2)).be.equal(3);
+    });
+
+    it('Should return noop by path "" and {}', function() {
+      const result = keyget.method({}, '');
+      should.doesNotThrow(function() {
+        result();
+      });
+    });
+
+    it('Should return noop by path ["a", "b"] and {}', function() {
+      const result = keyget.method({}, ['a', 'b']);
+      should.doesNotThrow(function() {
+        result();
+      });
+    });
+  });
+
+  describe('at()', function() {
+    it('Should update {} by path ""', function() {
+      const result = keyget.at({}, '', function () {
+        return {a: 1};
+      });
+      should(result).be.deepEqual({a: 1});
+    });
+
+    it('Should update {} by path [0]', function() {
+      const result = keyget.at({}, [0], function (target, key) {
+        target[key] = 1;
+        return target;
+      });
+      should(result).be.deepEqual([1]);
+    });
+
+    it('Should update [] by path [0]', function() {
+      const result = keyget.at([], [0], function (target, key) {
+        target[key] = 1;
+        return target;
+      });
+      should(result).be.deepEqual([1]);
+    });
+  });
+
   describe('set()', function() {
     it('Should set value to null by path []', function() {
       const result = keyget.set(null, [], true);
@@ -188,6 +272,26 @@ describe('keyget', function () {
       const result = keyget.set(null, [0, 'a'], 1);
 
       should(result).be.deepEqual([{a:1}]);
+    });
+
+    it('Should convert to value to Array', function() {
+      const result = keyget.set({a: {}}, ['a', 0], true);
+
+      should(result).be.deepEqual({
+        a: [true],
+      });
+    });
+
+    it('Should convert to value to Array', function() {
+      const result = keyget.set([], [0], true);
+
+      should(result).be.deepEqual([true]);
+    });
+
+    it('Should through on constructor as a key', function() {
+      should.throws(function () {
+        keyget.set({}, 'constructor', {});
+      }, /constructor/);
     });
   });
 

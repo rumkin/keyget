@@ -1,8 +1,17 @@
-# v2.1
+# CHANGELOG
+
+### v2.3
+
+* Fix security vulnerabilities:
+  * Prototype pollution in methods `set`, `push` and `at`.
+* Fix inconsistency in method `method` when calling on function as a target.
+  Previousely it was bind to itself, now to null.
+
+### v2.1
 
 * Add `breadcrumbs` method.
 
-# v2.0
+### v2.0
 
 Refactored and reviewed 1.0 version. Has some breaking changes:
 
@@ -10,7 +19,7 @@ Refactored and reviewed 1.0 version. Has some breaking changes:
   to target itself.
 * Update methods always return target.
 
-# v1.0
+### v1.0
 
 Initial version.
 
