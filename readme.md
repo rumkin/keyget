@@ -4,7 +4,8 @@
 [![Travis](https://img.shields.io/travis/rumkin/keyget.svg?style=flat-square)](https://travis-ci.org/rumkin/keyget)
 
 Tiny kit for nested objects modification. It can find, get, set, push or call
-nested properties, create bindings, destructure objects and a little bit more.
+nested properties, create bindings, destructure objects and and construct
+them back.
 
 ## ToC
 <!-- TOC -->
@@ -14,6 +15,7 @@ nested properties, create bindings, destructure objects and a little bit more.
 - [API](#api)
   - [`get()`](#get)
   - [`set()`](#set)
+  - [`push()`](#push)
   - [`has()`](#has)
   - [`call()`](#call)
   - [`method()`](#method)
@@ -69,11 +71,22 @@ Returns property value or undefined if there is no such property.
 
 ### `set()`
 ```
-(target: *, path: Path, value: * ) -> null
+(target: *, path: Path, value: *) -> *
 ```
 
 Set value into `target`. If any `target`'s property on the `path` is not an object,
 replaces it with the new plain object.
+
+Returns `target`.
+
+### `push()`
+```
+(target: *, path: Path, value: *) -> *
+```
+
+Push value into `target` by path. If any `target`'s property on the `path` is not an object,
+replaces it with the new plain object. If the target pointed by path is not an array, replace
+it with an array, then push into it.
 
 Returns `target`.
 
@@ -102,7 +115,7 @@ Returns methods result or undefined if method not exists.
 ```
 
 Get nested method of `target` by `path` and returns method binding with `this`
-context set to method's owner object. If method not found, returns empty
+context set to method's owner object. If method not found, returns no-op
 function.
 
 ### `breadcrumbs()`

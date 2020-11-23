@@ -1,7 +1,7 @@
 {
   "name": "keyget",
   "description": "Is nested object manipulation kit. It can find, get, set, push or call nested properties.",
-  "version": "2.3.0-rc.3",
+  "version": "2.3.0",
   "main": "index.js",
   "scripts": {
     "cov": "nyc npm run test",
